@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "954796230206",
+    "firebase_url": "https://flutter-chat-erick-default-rtdb.firebaseio.com",
+    "project_id": "flutter-chat-erick",
+    "storage_bucket": "flutter-chat-erick.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:954796230206:android:dcecdcb171a9a7ef93336f",
+        "android_client_info": {
+          "package_name": "com.example.flutter_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "954796230206-9qr8i3pt3a9kblsrqtvdt8p5k4dps359.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGTUz_eBccUy8cLZtr-5ZZYJ-1PNA9nkU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "954796230206-9qr8i3pt3a9kblsrqtvdt8p5k4dps359.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "954796230206-0queuq23ji3lric4k1uuu7f0u452b39p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterChat"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
