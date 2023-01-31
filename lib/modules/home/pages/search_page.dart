@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/modules/chat/pages/chat_info.dart';
 import 'package:flutter_chat/widgets/chat_container.dart';
 
 import '../../auth/services/database_service.dart';
@@ -115,9 +114,21 @@ class _SearchPageState extends State<SearchPage> {
             ListView.builder(
               itemBuilder: (context, index) {
                 return _users[index]['uid'] != widget.userName
-                    ? ChatContainer(
-                        groupName: _users[index]['name'],
-                        message: _users[index]['email'],
+                    ? InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatInfo(
+                              contactName: _users[index]['name'],
+                              contactId: _users[index]['uid'],
+                              userId: widget.userName,
+                            ),
+                          ),
+                        ),
+                        child: ChatContainer(
+                          groupName: _users[index]['name'],
+                          message: _users[index]['email'],
+                        ),
                       )
                     : Container();
               },
@@ -127,10 +138,13 @@ class _SearchPageState extends State<SearchPage> {
             ),
             ListView.builder(
               itemBuilder: (context, index) {
-                return ChatContainer(
-                  groupName: _groups[index]['groupName'],
-                  message: _groups[index]['groupDescription'],
-                  subtitle: '${_groups[index]['members'].length} miembros',
+                return InkWell(
+                  onTap: () {},
+                  child: ChatContainer(
+                    groupName: _groups[index]['groupName'],
+                    message: _groups[index]['groupDescription'],
+                    subtitle: '${_groups[index]['members'].length} miembros',
+                  ),
                 );
               },
               itemCount: _groups.length,

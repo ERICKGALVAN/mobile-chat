@@ -18,6 +18,9 @@ class DatabaseService {
       'email': email ?? '',
       'photoURL': photoUrl ?? '',
       'groups': [],
+      'requestSent': [],
+      'requestReceived': [],
+      'friends': [],
       'uid': uid,
     });
   }
@@ -143,5 +146,53 @@ class DatabaseService {
         'groups': FieldValue.arrayUnion(['${groupId}_$groupName']),
       });
     }
+  }
+
+  Future sendRequest(String senderId, String receiverId) async {
+    DocumentReference senderDocumentReference = userCollection.doc(senderId);
+    DocumentReference receiverDocumentReference =
+        userCollection.doc(receiverId);
+    await senderDocumentReference.update({
+      'requestSent': FieldValue.arrayUnion([receiverId]),
+    });
+    await receiverDocumentReference.update({
+      'requestReceived': FieldValue.arrayUnion([senderId]),
+    });
+  }
+
+  Future acceptRequest(String senderId, String receiverId) async {
+    DocumentReference senderDocumentReference = userCollection.doc(senderId);
+    DocumentReference receiverDocumentReference =
+        userCollection.doc(receiverId);
+    await senderDocumentReference.update({
+      'requestSent': FieldValue.arrayRemove([receiverId]),
+      'friends': FieldValue.arrayUnion([receiverId]),
+    });
+    await receiverDocumentReference.update({
+      'requestReceived': FieldValue.arrayRemove([senderId]),
+      'friends': FieldValue.arrayUnion([senderId]),
+    });
+  }
+
+  Future rejectRequest(String senderId, String receiverId) async {
+    DocumentReference senderDocumentReference = userCollection.doc(senderId);
+    DocumentReference receiverDocumentReference =
+        userCollection.doc(receiverId);
+    await senderDocumentReference.update({
+      'requestSent': FieldValue.arrayRemove([receiverId]),
+    });
+    await receiverDocumentReference.update({
+      'requestReceived': FieldValue.arrayRemove([senderId]),
+    });
+  }
+
+  Future findUserById(String userId) async {
+    DocumentSnapshot documentSnapshot = await userCollection.doc(userId).get();
+    return documentSnapshot;
+  }
+
+  Future getUserFriends() async {
+    DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
+    return documentSnapshot['friends'];
   }
 }

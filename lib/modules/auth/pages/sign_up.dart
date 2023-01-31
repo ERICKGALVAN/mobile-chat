@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/pages/login.dart';
 import 'package:flutter_chat/modules/home/pages/home_page.dart';
 import 'package:flutter_chat/widgets/main_button.dart';
 import 'package:flutter_chat/widgets/main_input.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
+import '../services/database_service.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -18,10 +21,11 @@ class _SignUpState extends State<SignUp> {
     setState(() {
       _isLoading = true;
     });
+    final prefs = await SharedPreferences.getInstance();
     await AuthService()
         .registerWithEmailAndPassword(_nameController.text,
             _emailController.text, _passwordController.text)
-        .then((value) {
+        .then((value) async {
       setState(() {
         _isLoading = false;
       });
@@ -33,14 +37,31 @@ class _SignUpState extends State<SignUp> {
               backgroundColor: Colors.green,
             ),
           );
-          if (context.mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const HomePage(),
-              ),
-            );
-          }
+
+          await AuthService()
+              .loginWithEmail(_emailController.text, _passwordController.text);
+
+          await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+              .getUserData(value)
+              .then(
+            (value) {
+              setState(() {
+                _isLoading = false;
+              });
+              prefs.setBool('isActive', true);
+
+              prefs.setString('name', value.docs[0]['name']);
+              prefs.setString('email', value.docs[0]['email']);
+              if (context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomePage(),
+                  ),
+                );
+              }
+            },
+          );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

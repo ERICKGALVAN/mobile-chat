@@ -1,31 +1,50 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
-import 'package:flutter_chat/modules/chat/pages/chat_info.dart';
 import 'package:flutter_chat/modules/chat_group/pages/chat_group_info.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({
+class ChatGroupPage extends StatefulWidget {
+  const ChatGroupPage({
     Key? key,
     required this.userName,
-    required this.contactName,
+    required this.groupId,
+    required this.groupName,
   }) : super(key: key);
-
+  final String groupName;
+  final String groupId;
   final String userName;
-  final String contactName;
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatGroupPage> createState() => _ChatGroupPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatGroupPageState extends State<ChatGroupPage> {
   Stream<QuerySnapshot>? _chats;
   String _admin = '';
   List _groupMembers = [];
 
   @override
   void initState() {
+    getChatData();
     super.initState();
+  }
+
+  Future getChatData() async {
+    await DatabaseService().getMessages(widget.groupId).then((value) {
+      setState(() {
+        _chats = value;
+      });
+    });
+    await DatabaseService().getGroupAdmin(widget.groupId).then((value) {
+      setState(() {
+        _admin = value;
+      });
+    });
+    await DatabaseService().getGroupMembers(widget.groupId).then((value) {
+      setState(() {
+        _groupMembers = value;
+      });
+    });
   }
 
   @override
@@ -35,7 +54,7 @@ class _ChatPageState extends State<ChatPage> {
         elevation: 0,
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text(widget.contactName),
+        title: Text(widget.groupName),
         actions: [
           IconButton(
             onPressed: () {
@@ -43,10 +62,12 @@ class _ChatPageState extends State<ChatPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return ChatInfo(
-                      contactId: widget.userName,
-                      contactName: widget.contactName,
-                      userId: widget.userName,
+                    return ChatGroupInfo(
+                      admin: _admin,
+                      userName: widget.userName,
+                      groupId: widget.groupId,
+                      groupMembers: _groupMembers,
+                      groupName: widget.groupName,
                     );
                   },
                 ),
@@ -59,7 +80,7 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
       body: Center(
-        child: Text(widget.contactName),
+        child: Text(widget.groupName),
       ),
     );
   }
