@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/widgets/main_button.dart';
@@ -21,6 +23,23 @@ class ChatInfo extends StatefulWidget {
 
 class _ChatInfoState extends State<ChatInfo> {
   bool _isLoading = false;
+  bool _isFriend = false;
+
+  @override
+  void didChangeDependencies() async {
+    setState(() {
+      _isLoading = true;
+    });
+    _isFriend =
+        await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+            .checkIfIsFriend(widget.contactId);
+    setState(() {
+      _isLoading = false;
+    });
+
+    super.didChangeDependencies();
+  }
+
   String getName(String value) {
     return value.split('_')[1];
   }
@@ -106,12 +125,30 @@ class _ChatInfoState extends State<ChatInfo> {
                     const SizedBox(
                       height: 20,
                     ),
-                    MainButton(
-                      text: 'Añadir contacto',
-                      onPressed: () async {
-                        await _addContact();
-                      },
-                    ),
+                    _isFriend
+                        ? Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      const Color.fromARGB(255, 236, 236, 236)
+                                          .withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Text('Ya son amigos'),
+                          )
+                        : MainButton(
+                            text: 'Añadir contacto',
+                            onPressed: () async {
+                              await _addContact();
+                            },
+                          ),
                   ],
                 ),
               ),

@@ -1,10 +1,10 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../widgets/chat_container.dart';
-import '../../auth/services/database_service.dart';
+import '../bloc/cotacts_cubit/contacts_cubit.dart';
 
 class Contacts extends StatefulWidget {
   const Contacts({Key? key}) : super(key: key);
@@ -14,12 +14,6 @@ class Contacts extends StatefulWidget {
 }
 
 class _ContactsState extends State<Contacts> {
-  @override
-  void initState() {
-    getUserData();
-    super.initState();
-  }
-
   String getGroupId(String value) {
     return value.split('_')[0];
   }
@@ -28,55 +22,62 @@ class _ContactsState extends State<Contacts> {
     return value.split('_')[1];
   }
 
-  Future<void> getUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
-    await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
-        .getUserFriends()
-        .then((value) {
-      log(value.toString());
-      setState(() {
-        _friendsAux = value;
-      });
-    });
-
-    for (var i = 0; i < _friendsAux.length; i++) {
-      await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
-          .findUserById(_friendsAux[i])
-          .then((value) {
-        setState(() {
-          _friends.add(value.data());
-        });
-      });
+  Future getNames(String uid) async {
+    final contactsBloc = BlocProvider.of<ContactsCubit>(context);
+    if (contactsBloc.state is LoadedState) {
+      if (contactsBloc.friends == null) {}
     }
-    log(_friends.toString());
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
-  List _friendsAux = [];
-  final List _friends = [];
-  bool _isLoading = false;
+  final Map<String, dynamic> _names = {};
+  final Map<String, dynamic> _emails = {};
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? Center(
-            child: CircularProgressIndicator(
-              color: Theme.of(context).primaryColor,
-            ),
-          )
-        : ListView.builder(
-            itemCount: _friends.length,
-            itemBuilder: (context, index) {
-              return ChatContainer(
-                groupName: _friends[index]['name'],
-                message: _friends[index]['email'],
-              );
+    return BlocBuilder<ContactsCubit, ContactsState>(
+      builder: (context, state) {
+        if (state is LoadingState) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (state is LoadedState) {
+          return StreamBuilder(
+            stream: state.contacts,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return state.names.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No friends',
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: snapshot.data!['friends'].length,
+                        itemBuilder: (context, index) {
+                          return ChatContainer(
+                            groupName: state.names[
+                                snapshot.data!['friends'][index].toString()],
+                            message: state.emails[
+                                snapshot.data!['friends'][index].toString()],
+                          );
+                        },
+                      );
+              } else {
+                return const Center(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.red,
+                    ),
+                  ),
+                );
+              }
             },
           );
+        }
+        return const Center(
+          child: Text('Error'),
+        );
+      },
+    );
   }
 }

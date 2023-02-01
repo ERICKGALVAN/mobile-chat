@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:badges/badges.dart' as badges;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
@@ -19,7 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List? _requestReceived;
+  QuerySnapshot? _requestReceived;
   bool _isLoading = false;
   String _name = '';
   String _email = '';
@@ -36,24 +39,20 @@ class _HomePageState extends State<HomePage> {
       _isLoading = true;
     });
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('email') ?? '';
     _name = prefs.getString('name') ?? '';
     _photoUrl = prefs.getString('photoUrl') ?? '';
     _email = prefs.getString('email') ?? '';
 
-    await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
-        .getUserData(email)
-        .then((value) {
-      if (value.docs.isEmpty) {
-        return;
-      }
-      setState(() {
-        _requestReceived = value.docs[0]['requestReceived'];
-      });
-    });
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future getNotifications() async {
+    final querySnapshot =
+        await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+            .getUserData(_email);
+    return querySnapshot;
   }
 
   String getGroupId(String value) {
@@ -87,37 +86,43 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           actions: [
-            _isLoading || _requestReceived == null || _requestReceived!.isEmpty
-                ? IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.notifications,
-                    ),
-                  )
-                : badges.Badge(
-                    badgeContent: Text(
-                      _requestReceived != null
-                          ? _requestReceived!.length.toString()
-                          : '0',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    position: badges.BadgePosition.topEnd(top: 1, end: 5),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NotificationsPage(
-                              notifications: _requestReceived!,
+            FutureBuilder(
+              future: getNotifications(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return snapshot.data.docs[0]['requestReceived'].length == 0
+                      ? const Icon(
+                          Icons.notifications,
+                        )
+                      : badges.Badge(
+                          badgeContent: Text(
+                            snapshot.data.docs[0]['requestReceived'].length
+                                .toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          position: badges.BadgePosition.topEnd(top: 1, end: 5),
+                          child: IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NotificationsPage(
+                                    notifications: snapshot.data.docs[0]
+                                        ['requestReceived'],
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.notifications,
                             ),
                           ),
                         );
-                      },
-                      icon: const Icon(
-                        Icons.notifications,
-                      ),
-                    ),
-                  ),
+                } else {
+                  return const SizedBox();
+                }
+              },
+            ),
             IconButton(
               onPressed: () {
                 Navigator.push(

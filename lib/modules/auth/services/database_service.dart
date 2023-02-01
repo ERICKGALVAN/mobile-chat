@@ -186,13 +186,23 @@ class DatabaseService {
     });
   }
 
+  Future<bool> checkIfIsFriend(String userId) async {
+    DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
+    final List friends = documentSnapshot['friends'];
+    if (friends.contains(userId)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Future findUserById(String userId) async {
     DocumentSnapshot documentSnapshot = await userCollection.doc(userId).get();
+    log(documentSnapshot['friends'].toString());
     return documentSnapshot;
   }
 
-  Future getUserFriends() async {
-    DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
-    return documentSnapshot['friends'];
+  Future<Stream> getUserFriends() async {
+    return userCollection.doc(uid).snapshots();
   }
 }
