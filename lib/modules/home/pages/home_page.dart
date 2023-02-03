@@ -1,10 +1,7 @@
-import 'dart:developer';
-
 import 'package:badges/badges.dart' as badges;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/modules/home/pages/contacts.dart';
 import 'package:flutter_chat/modules/home/pages/create_group.dart';
 import 'package:flutter_chat/modules/home/pages/groups.dart';
@@ -22,11 +19,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  QuerySnapshot? _requestReceived;
-  bool _isLoading = false;
   String _name = '';
   String _email = '';
   String _photoUrl = '';
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -42,17 +38,9 @@ class _HomePageState extends State<HomePage> {
     _name = prefs.getString('name') ?? '';
     _photoUrl = prefs.getString('photoUrl') ?? '';
     _email = prefs.getString('email') ?? '';
-
     setState(() {
       _isLoading = false;
     });
-  }
-
-  Future getNotifications() async {
-    final querySnapshot =
-        await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
-            .getUserData(_email);
-    return querySnapshot;
   }
 
   String getGroupId(String value) {
@@ -78,49 +66,50 @@ class _HomePageState extends State<HomePage> {
             indicatorColor: Colors.white,
             tabs: [
               Tab(
-                text: 'Grupos',
+                text: 'Chats',
               ),
               Tab(
-                text: 'Chats',
+                text: 'Grupos',
               ),
             ],
           ),
           actions: [
-            FutureBuilder(
-              future: getNotifications(),
+            StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return snapshot.data.docs[0]['requestReceived'].length == 0
-                      ? const Icon(
-                          Icons.notifications,
-                        )
-                      : badges.Badge(
-                          badgeContent: Text(
-                            snapshot.data.docs[0]['requestReceived'].length
-                                .toString(),
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          position: badges.BadgePosition.topEnd(top: 1, end: 5),
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NotificationsPage(
-                                    notifications: snapshot.data.docs[0]
-                                        ['requestReceived'],
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.notifications,
-                            ),
-                          ),
-                        );
-                } else {
-                  return const SizedBox();
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData ||
+                    snapshot.hasError ||
+                    snapshot.data!['requestReceived'].length == 0) {
+                  return const Icon(
+                    Icons.notifications,
+                  );
                 }
+                return badges.Badge(
+                  badgeContent: Text(
+                    snapshot.data!['requestReceived'].length.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  position: badges.BadgePosition.topEnd(top: 1, end: 5),
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationsPage(
+                            notifications: snapshot.data!['requestReceived'],
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.notifications,
+                    ),
+                  ),
+                );
               },
             ),
             IconButton(
@@ -158,8 +147,8 @@ class _HomePageState extends State<HomePage> {
         ),
         body: const TabBarView(
           children: [
-            Groups(),
             Contacts(),
+            Groups(),
           ],
         ),
       ),

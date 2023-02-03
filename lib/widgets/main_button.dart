@@ -4,14 +4,14 @@ class MainButton extends StatelessWidget {
   const MainButton({
     Key? key,
     required this.text,
-    this.backgroundColor = const Color.fromARGB(255, 144, 55, 218),
+    this.backgroundColor,
     this.foregroundColor = Colors.white,
     this.fontSize = 18,
     required this.onPressed,
   }) : super(key: key);
   final String text;
   final double? fontSize;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final Color foregroundColor;
   final VoidCallback onPressed;
 
@@ -23,7 +23,7 @@ class MainButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           foregroundColor: foregroundColor,
-          backgroundColor: backgroundColor,
+          backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5.0),
           ),

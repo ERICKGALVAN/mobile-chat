@@ -127,8 +127,13 @@ class _ChatInfoState extends State<ChatInfo> {
                     ),
                     _isFriend
                         ? Container(
+                            width: double.infinity,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: Colors.green,
+                                width: 2,
+                              ),
                               color: Colors.white,
                               boxShadow: [
                                 BoxShadow(
@@ -141,7 +146,30 @@ class _ChatInfoState extends State<ChatInfo> {
                                 ),
                               ],
                             ),
-                            child: Text('Ya son amigos'),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text(
+                                    'Ya son amigos',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 20,
+                                  ),
+                                  Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                    size: 30,
+                                  ),
+                                ],
+                              ),
+                            ),
                           )
                         : MainButton(
                             text: 'Añadir contacto',

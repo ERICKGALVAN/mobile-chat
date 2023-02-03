@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/pages/sign_up.dart';
@@ -39,23 +41,26 @@ class _LoginState extends State<Login> {
       }
       await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
           .getUserData(value)
-          .then((value) {
-        setState(() {
-          _isLoading = false;
-        });
+          .then(
+        (value) {
+          setState(() {
+            _isLoading = false;
+          });
 
-        prefs.setString('name', value.docs[0]['name']);
-        prefs.setString('email', value.docs[0]['email']);
-        prefs.setBool('isActive', true);
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomePage(),
-            ),
-          );
-        }
-      });
+          prefs.setString('name', value.docs[0]['name']);
+          prefs.setString('email', value.docs[0]['email']);
+          prefs.setBool('isActive', true);
+          log(prefs.getString('name') ?? 'dog');
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          }
+        },
+      );
     }).catchError((error) {
       setState(() {
         _isLoading = false;

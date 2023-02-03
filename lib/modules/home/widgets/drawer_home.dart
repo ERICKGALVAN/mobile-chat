@@ -79,11 +79,12 @@ class _DrawerHomeState extends State<DrawerHome> {
               onPressed: () async {
                 await AuthService().signOut();
                 if (context.mounted) {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const Login(),
                     ),
+                    (route) => false,
                   );
                 }
               },

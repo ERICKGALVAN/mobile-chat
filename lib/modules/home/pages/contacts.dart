@@ -1,13 +1,14 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_chat/modules/chat/pages/chat_page.dart';
 
 import '../../../widgets/chat_container.dart';
 import '../bloc/cotacts_cubit/contacts_cubit.dart';
 
 class Contacts extends StatefulWidget {
-  const Contacts({Key? key}) : super(key: key);
+  const Contacts({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<Contacts> createState() => _ContactsState();
@@ -29,9 +30,6 @@ class _ContactsState extends State<Contacts> {
     }
   }
 
-  final Map<String, dynamic> _names = {};
-  final Map<String, dynamic> _emails = {};
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ContactsCubit, ContactsState>(
@@ -48,17 +46,32 @@ class _ContactsState extends State<Contacts> {
                 return state.names.isEmpty
                     ? const Center(
                         child: Text(
-                          'No friends',
+                          'No tienes contactos aún',
                         ),
                       )
                     : ListView.builder(
                         itemCount: snapshot.data!['friends'].length,
                         itemBuilder: (context, index) {
-                          return ChatContainer(
-                            groupName: state.names[
-                                snapshot.data!['friends'][index].toString()],
-                            message: state.emails[
-                                snapshot.data!['friends'][index].toString()],
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    userName: '',
+                                    contactName: state.names[snapshot
+                                        .data!['friends'][index]
+                                        .toString()],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: ChatContainer(
+                              groupName: state.names[
+                                  snapshot.data!['friends'][index].toString()],
+                              message: state.emails[
+                                  snapshot.data!['friends'][index].toString()],
+                            ),
                           );
                         },
                       );

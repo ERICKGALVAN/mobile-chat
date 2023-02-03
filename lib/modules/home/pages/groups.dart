@@ -1,12 +1,9 @@
-import 'dart:developer';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat/modules/home/bloc/groups_cubit/groups_cubit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../widgets/chat_container.dart';
-import '../../auth/services/database_service.dart';
 import '../../chat_group/pages/chat_group_page.dart';
 
 class Groups extends StatefulWidget {
@@ -18,8 +15,12 @@ class Groups extends StatefulWidget {
 
 class _GroupsState extends State<Groups> {
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() async {
+    final prefs = await SharedPreferences.getInstance();
+    _name = prefs.getString('name');
+    _email = prefs.getString('email');
+
+    super.didChangeDependencies();
   }
 
   String getGroupId(String value) {
@@ -30,18 +31,18 @@ class _GroupsState extends State<Groups> {
     return value.split('_')[1];
   }
 
-  Stream? _groups;
-  String _name = '';
+  String? _name = '';
+  String? _email = '';
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GroupsCubit, GroupsState>(
       builder: (context, state) {
-        if (state is LoadingState) {
+        if (state is LoadingGroups) {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        } else if (state is LoadedState) {
+        } else if (state is LoadedGroups) {
           return StreamBuilder(
             stream: state.groups,
             builder: (context, snapshot) {
@@ -63,7 +64,8 @@ class _GroupsState extends State<Groups> {
                                     snapshot.data['groups'][reversedIndex]),
                                 groupName: getGroupName(
                                     snapshot.data['groups'][reversedIndex]),
-                                userName: _name,
+                                userName: _name ?? '',
+                                userEmail: _email ?? '',
                               ),
                             ),
                           ),
@@ -94,7 +96,7 @@ class _GroupsState extends State<Groups> {
               );
             },
           );
-        } else if (state is ErrorState) {
+        } else if (state is ErrorGroups) {
           return Center(
             child: Text(state.error),
           );

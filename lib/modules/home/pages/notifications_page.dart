@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/modules/home/widgets/notification_container.dart';

@@ -1,8 +1,9 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/modules/chat/pages/chat_info.dart';
-import 'package:flutter_chat/modules/chat_group/pages/chat_group_info.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({
@@ -22,11 +23,7 @@ class _ChatPageState extends State<ChatPage> {
   Stream<QuerySnapshot>? _chats;
   String _admin = '';
   List _groupMembers = [];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   Widget build(BuildContext context) {

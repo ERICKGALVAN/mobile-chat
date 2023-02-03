@@ -12,7 +12,10 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('groups');
 
   Future<void> updateUserData(
-      String? name, String? email, String? photoUrl) async {
+    String? name,
+    String? email,
+    String? photoUrl,
+  ) async {
     return await userCollection.doc(uid).set({
       'name': name ?? '',
       'email': email ?? '',
@@ -25,7 +28,9 @@ class DatabaseService {
     });
   }
 
-  Future<QuerySnapshot<Object?>> getUserData(String email) async {
+  Future<QuerySnapshot<Object?>> getUserData(
+    String email,
+  ) async {
     QuerySnapshot querySnapshot = await userCollection
         .where('email', isEqualTo: email)
         .get()
@@ -57,6 +62,7 @@ class DatabaseService {
       'recentMessage': '',
       'recentMessageSender': '',
       'recentMessageTime': '',
+      'messages': [],
     });
     await groupDocumentReference.update({
       'members': FieldValue.arrayUnion(['${id}_$userName']),
@@ -160,30 +166,42 @@ class DatabaseService {
     });
   }
 
-  Future acceptRequest(String senderId, String receiverId) async {
-    DocumentReference senderDocumentReference = userCollection.doc(senderId);
-    DocumentReference receiverDocumentReference =
-        userCollection.doc(receiverId);
-    await senderDocumentReference.update({
-      'requestSent': FieldValue.arrayRemove([receiverId]),
-      'friends': FieldValue.arrayUnion([receiverId]),
-    });
-    await receiverDocumentReference.update({
-      'requestReceived': FieldValue.arrayRemove([senderId]),
-      'friends': FieldValue.arrayUnion([senderId]),
-    });
+  Future<bool> acceptRequest(String senderId, String receiverId) async {
+    try {
+      DocumentReference senderDocumentReference = userCollection.doc(senderId);
+      DocumentReference receiverDocumentReference =
+          userCollection.doc(receiverId);
+      await senderDocumentReference.update({
+        'requestSent': FieldValue.arrayRemove([receiverId]),
+        'friends': FieldValue.arrayUnion([receiverId]),
+      });
+      await receiverDocumentReference.update({
+        'requestReceived': FieldValue.arrayRemove([senderId]),
+        'friends': FieldValue.arrayUnion([senderId]),
+      });
+      return true;
+    } catch (e) {
+      log(e.toString());
+      return false;
+    }
   }
 
-  Future rejectRequest(String senderId, String receiverId) async {
-    DocumentReference senderDocumentReference = userCollection.doc(senderId);
-    DocumentReference receiverDocumentReference =
-        userCollection.doc(receiverId);
-    await senderDocumentReference.update({
-      'requestSent': FieldValue.arrayRemove([receiverId]),
-    });
-    await receiverDocumentReference.update({
-      'requestReceived': FieldValue.arrayRemove([senderId]),
-    });
+  Future<bool> rejectRequest(String senderId, String receiverId) async {
+    try {
+      DocumentReference senderDocumentReference = userCollection.doc(senderId);
+      DocumentReference receiverDocumentReference =
+          userCollection.doc(receiverId);
+      await senderDocumentReference.update({
+        'requestSent': FieldValue.arrayRemove([receiverId]),
+      });
+      await receiverDocumentReference.update({
+        'requestReceived': FieldValue.arrayRemove([senderId]),
+      });
+      return true;
+    } catch (e) {
+      log(e.toString());
+      return false;
+    }
   }
 
   Future<bool> checkIfIsFriend(String userId) async {
@@ -204,5 +222,33 @@ class DatabaseService {
 
   Future<Stream> getUserFriends() async {
     return userCollection.doc(uid).snapshots();
+  }
+
+  Future sendMessageToGroup(
+      String groupId, String message, String sender, String email) async {
+    DocumentReference groupDocumentReference = groupCollection.doc(groupId);
+    groupDocumentReference.update({
+      'recentMessage': message,
+      'recentMessageSender': sender,
+      'recentMessageTime': DateTime.now(),
+    });
+    await groupDocumentReference.update(
+      {
+        'messages': FieldValue.arrayUnion(
+          [
+            {
+              'message': message,
+              'sender': sender,
+              'senderEmail': email,
+              'time': DateTime.now()
+            }
+          ],
+        ),
+      },
+    );
+  }
+
+  Future<Stream> getGroupMessages(String groupId) async {
+    return groupCollection.doc(groupId).snapshots();
   }
 }

@@ -14,10 +14,9 @@ class GroupsCubit extends Cubit<GroupsState> {
   Stream? groups;
 
   Future<void> getUserGroups() async {
-    emit(LoadingState(true));
+    emit(LoadingGroups(true));
     groups = await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
         .getUserGroups();
-    emit(LoadingState(false));
-    emit(LoadedState(groups!));
+    emit(LoadedGroups(groups!));
   }
 }

@@ -6,20 +6,20 @@ class GroupsInitial extends GroupsState {
   Stream? get props => null;
 }
 
-class LoadingState extends GroupsState {
-  LoadingState(this.isLoading);
+class LoadingGroups extends GroupsState {
+  LoadingGroups(this.isLoading);
   bool isLoading;
   bool get props => isLoading;
 }
 
-class LoadedState extends GroupsState {
-  LoadedState(this.groups);
+class LoadedGroups extends GroupsState {
+  LoadedGroups(this.groups);
   Stream groups;
   Stream get props => groups;
 }
 
-class ErrorState extends GroupsState {
-  ErrorState(this.error);
+class ErrorGroups extends GroupsState {
+  ErrorGroups(this.error);
   String error;
   String get props => error;
 }

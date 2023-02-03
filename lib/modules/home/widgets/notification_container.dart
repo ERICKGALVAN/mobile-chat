@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
+import 'package:flutter_chat/modules/home/bloc/cotacts_cubit/contacts_cubit.dart';
 
 class NotificationContainer extends StatefulWidget {
   const NotificationContainer({
@@ -23,7 +25,58 @@ class _NotificationContainerState extends State<NotificationContainer> {
       _isLoading = true;
     });
     await DatabaseService()
-        .acceptRequest(widget.userId, FirebaseAuth.instance.currentUser!.uid);
+        .acceptRequest(widget.userId, FirebaseAuth.instance.currentUser!.uid)
+        .then((value) {
+      if (value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Solicitud aceptada'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al aceptar solicitud'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _rejectFriendRequest() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await DatabaseService()
+        .rejectRequest(widget.userId, FirebaseAuth.instance.currentUser!.uid)
+        .then((value) async {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      await context.read<ContactsCubit>().getUserData();
+      if (value) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('Solicitud rechazada'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('Error al rechazar solicitud'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
     setState(() {
       _isLoading = false;
     });
@@ -111,16 +164,21 @@ class _NotificationContainerState extends State<NotificationContainer> {
                       const SizedBox(
                         width: 10,
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: Colors.grey[200],
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.red,
+                      InkWell(
+                        onTap: () async {
+                          await _rejectFriendRequest();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.grey[200],
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.red,
+                            ),
                           ),
                         ),
                       ),

@@ -24,9 +24,8 @@ class ContactsCubit extends Cubit<ContactsState> {
           await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
               .getUserFriends();
       final friendsList = await friends!.first;
-
       List<Future> futures = [];
-      friendsList['friends'].forEach(
+      await friendsList['friends'].forEach(
         (element) {
           futures.add(
             DatabaseService().findUserById(element.toString()).then(
@@ -45,6 +44,4 @@ class ContactsCubit extends Cubit<ContactsState> {
       emit(ErrorState(e.toString()));
     }
   }
-
-  Future<void> getFriendsNames(String uid) async {}
 }
