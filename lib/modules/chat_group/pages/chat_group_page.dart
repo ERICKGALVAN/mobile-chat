@@ -1,10 +1,9 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/modules/chat_group/pages/chat_group_info.dart';
+import 'package:flutter_chat/widgets/message_container.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatGroupPage extends StatefulWidget {
   const ChatGroupPage({
@@ -24,20 +23,24 @@ class ChatGroupPage extends StatefulWidget {
 }
 
 class _ChatGroupPageState extends State<ChatGroupPage> {
+  @override
+  void didChangeDependencies() async {
+    final prefs = await SharedPreferences.getInstance();
+    _name = prefs.getString('name')!;
+    super.didChangeDependencies();
+  }
+
   Stream? _messages;
   String _admin = '';
   List _groupMembers = [];
   final _messageController = TextEditingController();
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
+  String _name = '';
 
   @override
   void initState() {
     getChatData();
-
-    _scrollController.addListener(() {
-      log(_scrollController.hasClients.toString());
-    });
 
     super.initState();
   }
@@ -71,7 +74,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
       await DatabaseService().sendMessageToGroup(
         widget.groupId,
         _messageController.text,
-        widget.userName,
+        _name,
         widget.userEmail,
       );
       _messageController.clear();
@@ -117,52 +120,34 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return SingleChildScrollView(
+                    controller: _scrollController,
                     reverse: true,
                     child: Column(
                       children: [
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.8,
                           child: Container(
-                            color: Colors.red,
+                            color: const Color.fromARGB(255, 68, 18, 161),
                             child: ListView.builder(
                               dragStartBehavior: DragStartBehavior.down,
                               primary: true,
                               shrinkWrap: true,
                               itemCount: snapshot.data!['messages'].length,
                               itemBuilder: (context, index) {
-                                return Container(
-                                  padding: const EdgeInsets.only(
-                                    top: 8,
-                                    bottom: 8,
-                                    left: 14,
-                                    right: 14,
-                                  ),
-                                  child: Align(
-                                    alignment: (snapshot.data!['messages']
-                                                [index]['sender'] ==
-                                            widget.userName
-                                        ? Alignment.topRight
-                                        : Alignment.topLeft),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: (snapshot.data!['messages']
-                                                    [index]['sender'] ==
-                                                widget.userName
-                                            ? const Color(0xff007EF4)
-                                            : const Color(0xff1A1A1A)),
-                                      ),
-                                      padding: const EdgeInsets.all(16),
-                                      child: Text(
-                                        snapshot.data!['messages'][index]
-                                            ['message'],
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                return MessageContainer(
+                                  userName: widget.userName,
+                                  sender: snapshot.data!['messages'][index]
+                                      ['sender'],
+                                  senderEmail: snapshot.data!['messages'][index]
+                                          ['senderEmail'] ??
+                                      '',
+                                  message: snapshot.data!['messages'][index]
+                                      ['message'],
+                                  time: snapshot.data!['messages'][index]
+                                      ['time'],
+                                  date: snapshot.data!['messages'][index]
+                                      ['time'],
+                                  isGroup: true,
                                 );
                               },
                             ),

@@ -10,10 +10,14 @@ class NotificationContainer extends StatefulWidget {
     required this.userName,
     required this.email,
     required this.userId,
+    required this.senderName,
+    required this.senderEmail,
   }) : super(key: key);
   final String userName;
   final String email;
   final String userId;
+  final String senderName;
+  final String senderEmail;
 
   @override
   State<NotificationContainer> createState() => _NotificationContainerState();
@@ -25,7 +29,14 @@ class _NotificationContainerState extends State<NotificationContainer> {
       _isLoading = true;
     });
     await DatabaseService()
-        .acceptRequest(widget.userId, FirebaseAuth.instance.currentUser!.uid)
+        .acceptRequest(
+      widget.userId,
+      FirebaseAuth.instance.currentUser!.uid,
+      widget.senderName,
+      widget.userName,
+      widget.senderEmail,
+      widget.email,
+    )
         .then((value) {
       if (value) {
         ScaffoldMessenger.of(context).showSnackBar(

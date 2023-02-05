@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/chat/pages/chat_info.dart';
+import 'package:flutter_chat/modules/chat_group/pages/chat_group_info.dart';
 import 'package:flutter_chat/widgets/chat_container.dart';
 
 import '../../auth/services/database_service.dart';
@@ -140,10 +141,26 @@ class _SearchPageState extends State<SearchPage> {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {},
-                  child: ChatContainer(
-                    groupName: _groups[index]['groupName'],
-                    message: _groups[index]['groupDescription'],
-                    subtitle: '${_groups[index]['members'].length} miembros',
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatGroupInfo(
+                            admin: _groups[index]['admin'],
+                            userName: '',
+                            groupMembers: _groups[index]['members'],
+                            groupId: _groups[index]['groupId'].split('_')[0],
+                            groupName: _groups[index]['groupName'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: ChatContainer(
+                      groupName: _groups[index]['groupName'],
+                      message: _groups[index]['groupDescription'],
+                      subtitle: '${_groups[index]['members'].length} miembros',
+                    ),
                   ),
                 );
               },

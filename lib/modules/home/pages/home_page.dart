@@ -2,7 +2,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat/modules/home/pages/contacts.dart';
+import 'package:flutter_chat/modules/home/pages/chats.dart';
 import 'package:flutter_chat/modules/home/pages/create_group.dart';
 import 'package:flutter_chat/modules/home/pages/groups.dart';
 import 'package:flutter_chat/modules/home/pages/notifications_page.dart';
@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
         ),
         body: const TabBarView(
           children: [
-            Contacts(),
+            Chats(),
             Groups(),
           ],
         ),

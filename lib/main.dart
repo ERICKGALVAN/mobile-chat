@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat/modules/auth/pages/login.dart';
-import 'package:flutter_chat/modules/auth/pages/request_authorization.dart';
 import 'package:flutter_chat/modules/home/bloc/groups_cubit/groups_cubit.dart';
 import 'package:flutter_chat/modules/home/pages/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,10 +96,9 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        darkTheme: ThemeData.dark(),
         theme: ThemeData(
           //primaryColor: const Color.fromARGB(255, 144, 55, 218),
-          primaryColor: Colors.black,
+          primaryColor: const Color.fromARGB(255, 9, 133, 234),
         ),
         home: MultiBlocProvider(
           providers: [
@@ -111,11 +109,9 @@ class MyApp extends StatelessWidget {
               create: (context) => GroupsCubit(),
             ),
           ],
-          child: authorized
-              ? (isActive == false || isActive == null)
-                  ? const Login()
-                  : const HomePage()
-              : const RequestAuthorization(),
+          child: (isActive == false || isActive == null)
+              ? const Login()
+              : const HomePage(),
         ),
       ),
     );

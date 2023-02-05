@@ -18,6 +18,8 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final String _email = FirebaseAuth.instance.currentUser!.email!;
+
   bool _isLoading = false;
   @override
   Widget build(BuildContext context) {
@@ -79,6 +81,7 @@ class _CreateGroupState extends State<CreateGroup> {
                           FirebaseAuth.instance.currentUser!.uid,
                           _nameController.text,
                           _descriptionController.text,
+                          _email,
                         )
                             .whenComplete(() {
                           setState(() {

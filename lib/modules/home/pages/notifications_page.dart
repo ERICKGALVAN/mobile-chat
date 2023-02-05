@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/modules/home/widgets/notification_container.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({
@@ -19,6 +20,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     setState(() {
       _isLoading = true;
     });
+    final prefs = await SharedPreferences.getInstance();
+    _senderName = prefs.getString('name') ?? '';
+    _senderEmail = prefs.getString('email') ?? '';
+
     for (int i = 0; i < widget.notifications.length; i++) {
       await DatabaseService()
           .findUserById(widget.notifications[i])
@@ -36,6 +41,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   final List _users = [];
   bool _isLoading = false;
+  String _senderName = '';
+  String _senderEmail = '';
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +68,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   userName: _users[index]['name'],
                   email: _users[index]['email'],
                   userId: _users[index]['uid'],
+                  senderEmail: _senderEmail,
+                  senderName: _senderName,
                 );
               },
             ),
