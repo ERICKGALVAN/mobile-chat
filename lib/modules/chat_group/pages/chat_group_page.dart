@@ -1,4 +1,4 @@
-import 'package:flutter/gestures.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/modules/chat_group/pages/chat_group_info.dart';
@@ -119,78 +119,80 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               stream: _messages,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return SingleChildScrollView(
-                    controller: _scrollController,
-                    reverse: true,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.8,
-                          child: Container(
-                            color: const Color.fromARGB(255, 68, 18, 161),
-                            child: ListView.builder(
-                              dragStartBehavior: DragStartBehavior.down,
-                              primary: true,
-                              shrinkWrap: true,
-                              itemCount: snapshot.data!['messages'].length,
-                              itemBuilder: (context, index) {
-                                return MessageContainer(
-                                  userName: widget.userName,
-                                  sender: snapshot.data!['messages'][index]
-                                      ['sender'],
-                                  senderEmail: snapshot.data!['messages'][index]
-                                          ['senderEmail'] ??
-                                      '',
-                                  message: snapshot.data!['messages'][index]
-                                      ['message'],
-                                  time: snapshot.data!['messages'][index]
-                                      ['time'],
-                                  date: snapshot.data!['messages'][index]
-                                      ['time'],
-                                  isGroup: true,
-                                );
-                              },
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.8,
+                        child: Container(
+                          color: const Color.fromARGB(255, 68, 18, 161),
+                          child: ListView.builder(
+                            primary: true,
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!['messages'].length,
+                            itemBuilder: (context, index) {
+                              final Timestamp timeStamp =
+                                  snapshot.data!['messages'][index]['time'];
+                              final date = DateTime.fromMillisecondsSinceEpoch(
+                                      timeStamp.seconds * 1000)
+                                  .toLocal();
+                              final String formattedDate =
+                                  "${date.day}/${date.month}/${date.year}";
+                              final String formattedTime =
+                                  "${date.hour}:${date.minute}";
+                              return MessageContainer(
+                                userName: widget.userName,
+                                sender: snapshot.data!['messages'][index]
+                                    ['sender'],
+                                senderEmail: snapshot.data!['messages'][index]
+                                        ['senderEmail'] ??
+                                    '',
+                                message: snapshot.data!['messages'][index]
+                                    ['message'],
+                                time: formattedTime,
+                                date: formattedDate,
+                                isGroup: true,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _messageController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Type a message',
+                                  hintStyle: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 16,
+                                  ),
+                                  border: InputBorder.none,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _messageController,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Type a message',
-                                    hintStyle: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 16,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
+                            SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: FloatingActionButton(
+                                onPressed: () {
+                                  _sendMessage();
+                                },
+                                backgroundColor: const Color(0xff007EF4),
+                                elevation: 0,
+                                child: const Icon(
+                                  Icons.send,
+                                  color: Colors.white,
+                                  size: 18,
                                 ),
                               ),
-                              SizedBox(
-                                height: 50,
-                                width: 50,
-                                child: FloatingActionButton(
-                                  onPressed: () {
-                                    _sendMessage();
-                                  },
-                                  backgroundColor: const Color(0xff007EF4),
-                                  elevation: 0,
-                                  child: const Icon(
-                                    Icons.send,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 } else {
                   return const Center(

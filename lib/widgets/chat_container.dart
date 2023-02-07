@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatContainer extends StatelessWidget {
@@ -7,14 +8,21 @@ class ChatContainer extends StatelessWidget {
     this.message,
     this.subtitle,
     this.isJoined,
+    required this.lastSenderEmail,
+    required this.lastSenderName,
+    required this.isGroup,
   }) : super(key: key);
   final String groupName;
   final String? message;
   final String? subtitle;
   final bool? isJoined;
+  final String lastSenderEmail;
+  final String lastSenderName;
+  final bool isGroup;
 
   @override
   Widget build(BuildContext context) {
+    final String userEmail = FirebaseAuth.instance.currentUser!.email!;
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -44,11 +52,28 @@ class ChatContainer extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   message != null
-                      ? Text(
-                          message!,
-                          style: const TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                      ? Row(
+                          children: [
+                            lastSenderEmail.isEmpty || lastSenderName.isEmpty
+                                ? Container()
+                                : Text(
+                                    userEmail == lastSenderEmail
+                                        ? 'You'
+                                        : '$lastSenderName:',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                            const SizedBox(width: 5),
+                            Text(
+                              message!,
+                              style: const TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         )
                       : Container(),
                   subtitle != null

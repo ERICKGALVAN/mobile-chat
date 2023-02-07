@@ -319,6 +319,7 @@ class DatabaseService {
     groupDocumentReference.update({
       'recentMessage': message,
       'recentMessageSender': sender,
+      'recentMessageSenderEmail': email,
       'recentMessageTime': DateTime.now().toUtc(),
     });
     await groupDocumentReference.update(

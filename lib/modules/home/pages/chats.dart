@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -63,13 +65,30 @@ class _ChatsState extends State<Chats> {
                           ),
                         );
                       },
-                      child: ChatContainer(
-                        groupName: snapshot.data!['chats'][index]['chatWith']
-                                ['name']
-                            .toString(),
-                        message: snapshot.data!['chats'][index]['chatWith']
-                                ['email']
-                            .toString(),
+                      child: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('messages')
+                            .doc(snapshot.data!['chats'][index]['chatId'])
+                            .snapshots(),
+                        builder: (context, chatSnapshot) {
+                          return ChatContainer(
+                            groupName: snapshot.data!['chats'][index]
+                                    ['chatWith']['name']
+                                .toString(),
+                            message: chatSnapshot.hasData
+                                ? chatSnapshot.data!['recentMessage'].toString()
+                                : '',
+                            lastSenderEmail: chatSnapshot.hasData
+                                ? chatSnapshot.data!['recentMessageSenderEmail']
+                                    .toString()
+                                : '',
+                            lastSenderName: chatSnapshot.hasData
+                                ? chatSnapshot.data!['recentMessageSender']
+                                    .toString()
+                                : '',
+                            isGroup: false,
+                          );
+                        },
                       ),
                     );
                   },

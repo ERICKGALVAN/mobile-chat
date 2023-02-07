@@ -72,6 +72,9 @@ class _GroupsState extends State<Groups> {
                           child: ChatContainer(
                             groupName: getGroupName(
                                 snapshot.data['groups'][reversedIndex]),
+                            lastSenderEmail: '',
+                            lastSenderName: '',
+                            isGroup: true,
                           ),
                         );
                       },

@@ -129,6 +129,9 @@ class _SearchPageState extends State<SearchPage> {
                         child: ChatContainer(
                           groupName: _users[index]['name'],
                           message: _users[index]['email'],
+                          lastSenderEmail: '',
+                          lastSenderName: '',
+                          isGroup: false,
                         ),
                       )
                     : Container();
@@ -160,6 +163,9 @@ class _SearchPageState extends State<SearchPage> {
                       groupName: _groups[index]['groupName'],
                       message: _groups[index]['groupDescription'],
                       subtitle: '${_groups[index]['members'].length} miembros',
+                      lastSenderEmail: '',
+                      lastSenderName: '',
+                      isGroup: false,
                     ),
                   ),
                 );

@@ -98,7 +98,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           //primaryColor: const Color.fromARGB(255, 144, 55, 218),
-          primaryColor: const Color.fromARGB(255, 9, 133, 234),
+          primaryColor: const Color.fromARGB(255, 19, 103, 32),
         ),
         home: MultiBlocProvider(
           providers: [

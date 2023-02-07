@@ -135,7 +135,7 @@ class _ChatPageState extends State<ChatPage> {
                             onPressed: () {
                               _sendMessage();
                             },
-                            backgroundColor: const Color(0xff007EF4),
+                            backgroundColor: Theme.of(context).primaryColor,
                             elevation: 0,
                             child: const Icon(
                               Icons.send,
