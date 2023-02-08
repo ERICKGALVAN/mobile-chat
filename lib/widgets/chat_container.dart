@@ -11,6 +11,8 @@ class ChatContainer extends StatelessWidget {
     required this.lastSenderEmail,
     required this.lastSenderName,
     required this.isGroup,
+    required this.isTyping,
+    required this.photoUrl,
   }) : super(key: key);
   final String groupName;
   final String? message;
@@ -19,6 +21,8 @@ class ChatContainer extends StatelessWidget {
   final String lastSenderEmail;
   final String lastSenderName;
   final bool isGroup;
+  final bool isTyping;
+  final String photoUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +41,11 @@ class ChatContainer extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
-            const CircleAvatar(),
+            CircleAvatar(
+              radius: 30,
+              backgroundImage:
+                  photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+            ),
             const SizedBox(width: 20),
             Expanded(
               child: Column(
@@ -51,31 +59,42 @@ class ChatContainer extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  message != null
-                      ? Row(
-                          children: [
-                            lastSenderEmail.isEmpty || lastSenderName.isEmpty
-                                ? Container()
-                                : Text(
-                                    userEmail == lastSenderEmail
-                                        ? 'You'
-                                        : '$lastSenderName:',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                            const SizedBox(width: 5),
-                            Text(
-                              message!,
-                              style: const TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                  isTyping
+                      ? Text(
+                          'Typing...',
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.8),
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         )
-                      : Container(),
+                      : message != null
+                          ? Row(
+                              children: [
+                                lastSenderEmail.isEmpty ||
+                                        lastSenderName.isEmpty
+                                    ? Container()
+                                    : Text(
+                                        userEmail == lastSenderEmail
+                                            ? 'You'
+                                            : '$lastSenderName:',
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  message!,
+                                  style: const TextStyle(
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Container(),
                   subtitle != null
                       ? Text(
                           subtitle!,

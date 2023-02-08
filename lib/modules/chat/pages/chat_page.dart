@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,10 +15,12 @@ class ChatPage extends StatefulWidget {
     Key? key,
     required this.chatId,
     required this.contactName,
+    required this.contactId,
   }) : super(key: key);
 
   final String chatId;
   final String contactName;
+  final String contactId;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -41,8 +45,8 @@ class _ChatPageState extends State<ChatPage> {
         _name,
         _email,
       );
-      _messageController.clear();
     }
+    _messageController.clear();
   }
 
   String _name = '';
@@ -50,6 +54,29 @@ class _ChatPageState extends State<ChatPage> {
   Stream? _messages;
   final _scrollController = ScrollController();
   final _messageController = TextEditingController();
+  bool _isTyping = false;
+  bool _firstEnter = false;
+  Timer? _timer;
+
+  void _startTimer() {
+    _timer = Timer(const Duration(milliseconds: 300), () async {
+      await changeIsTyping(false);
+      _isTyping = false;
+    });
+  }
+
+  void _cancelTimer() {
+    if (_timer != null) {
+      _timer!.cancel();
+      _timer = null;
+    }
+  }
+
+  Future<void> changeIsTyping(bool isTyping) async {
+    await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+        .changeIsTyping(widget.chatId, isTyping);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +84,30 @@ class _ChatPageState extends State<ChatPage> {
         elevation: 0,
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text(widget.contactName),
+        title: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('messages')
+              .doc(widget.chatId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            return Column(
+              children: [
+                Text(widget.contactName),
+                const SizedBox(height: 5),
+                snapshot.hasData &&
+                        snapshot.data!['${widget.contactId}isTyping']
+                    ? const Text(
+                        'Typing...',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
+            );
+          },
+        ),
         actions: [
           IconButton(
             onPressed: () {},
@@ -79,9 +129,8 @@ class _ChatPageState extends State<ChatPage> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.8,
                     child: Container(
-                      color: const Color.fromARGB(255, 68, 18, 161),
+                      color: const Color.fromARGB(255, 122, 14, 26),
                       child: ListView.builder(
-                        dragStartBehavior: DragStartBehavior.down,
                         primary: true,
                         shrinkWrap: true,
                         itemCount: snapshot.data!['messages'].length,
@@ -126,6 +175,17 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               border: InputBorder.none,
                             ),
+                            onChanged: (value) async {
+                              if (!_firstEnter) {
+                                await changeIsTyping(true);
+                                _firstEnter = true;
+                              }
+                              if (!_isTyping) {
+                                await changeIsTyping(true);
+                              }
+                              _cancelTimer();
+                              _startTimer();
+                            },
                           ),
                         ),
                         SizedBox(

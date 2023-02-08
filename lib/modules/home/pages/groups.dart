@@ -70,11 +70,13 @@ class _GroupsState extends State<Groups> {
                             ),
                           ),
                           child: ChatContainer(
+                            photoUrl: '',
                             groupName: getGroupName(
                                 snapshot.data['groups'][reversedIndex]),
                             lastSenderEmail: '',
                             lastSenderName: '',
                             isGroup: true,
+                            isTyping: false,
                           ),
                         );
                       },

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/pages/login.dart';
 import 'package:flutter_chat/modules/auth/services/auth_service.dart';
 
+import '../../profile/pages/profile.dart';
+
 class DrawerHome extends StatefulWidget {
   const DrawerHome({
     Key? key,
@@ -75,6 +77,30 @@ class _DrawerHomeState extends State<DrawerHome> {
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 20),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Profile(
+                      name: widget.name,
+                      email: widget.email,
+                    ),
+                  ),
+                );
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Perfil',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            const Divider(),
             TextButton(
               onPressed: () async {
                 await AuthService().signOut();

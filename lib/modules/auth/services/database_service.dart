@@ -205,6 +205,7 @@ class DatabaseService {
         'recentMessage': '',
         'recentMessageSender': '',
         'recentMessageTime': '',
+        'recentMessageSenderEmail': '',
       });
 
       await messagesReference.update({
@@ -213,6 +214,21 @@ class DatabaseService {
           {'name': senderName, 'email': senderEmail, 'uid': senderId},
           {'name': receiverName, 'email': receiverEmail, 'uid': receiverId},
         ]),
+        '${senderId}isTyping': false,
+        '${receiverId}isTyping': false,
+      });
+
+      String senderPhoto = '';
+      String receiverPhoto = '';
+
+      await senderDocumentReference.get().then((value) {
+        log(value['photoURL']);
+        senderPhoto = value['photoURL'];
+      });
+
+      await receiverDocumentReference.get().then((value) {
+        log(value['photoURL']);
+        receiverPhoto = value['photoURL'];
       });
 
       await senderDocumentReference.update({
@@ -222,7 +238,8 @@ class DatabaseService {
             'chatWith': {
               'name': receiverName,
               'email': receiverEmail,
-              'uid': receiverId
+              'uid': receiverId,
+              'photoURL': receiverPhoto,
             },
           }
         ]),
@@ -235,7 +252,8 @@ class DatabaseService {
             'chatWith': {
               'name': senderName,
               'email': senderEmail,
-              'uid': senderId
+              'uid': senderId,
+              'photoURL': senderPhoto,
             },
           }
         ]),
@@ -344,5 +362,18 @@ class DatabaseService {
 
   Future<Stream> getChatMessages(String chatId) async {
     return messageCollection.doc(chatId).snapshots();
+  }
+
+  Future changeIsTyping(String chatId, bool isWriting) async {
+    DocumentReference chatDocumentReference = messageCollection.doc(chatId);
+    await chatDocumentReference.update({
+      '${uid}isTyping': isWriting,
+    });
+  }
+
+  Future changeProfilePicture(String url) async {
+    await userCollection.doc(uid).update({
+      'photoURL': url,
+    });
   }
 }

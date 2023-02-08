@@ -55,103 +55,105 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        drawer: DrawerHome(name: _name, email: _email, photoUrl: _photoUrl),
-        appBar: AppBar(
-          centerTitle: true,
-          elevation: 0,
-          backgroundColor: Theme.of(context).primaryColor,
-          title: const Text('Home'),
-          bottom: const TabBar(
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(
-                text: 'Chats',
-              ),
-              Tab(
-                text: 'Grupos',
-              ),
-            ],
-          ),
-          actions: [
-            StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(FirebaseAuth.instance.currentUser!.uid)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    !snapshot.hasData ||
-                    snapshot.hasError ||
-                    snapshot.data!['requestReceived'].length == 0) {
-                  return const Icon(
-                    Icons.notifications,
-                  );
-                }
-                return badges.Badge(
-                  badgeContent: Text(
-                    snapshot.data!['requestReceived'].length.toString(),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  position: badges.BadgePosition.topEnd(top: 1, end: 5),
-                  child: IconButton(
+      child: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            return Scaffold(
+              drawer: DrawerHome(
+                  name: _name,
+                  email: _email,
+                  photoUrl: snapshot.hasData ? snapshot.data!['photoURL'] : ''),
+              appBar: AppBar(
+                centerTitle: true,
+                elevation: 0,
+                backgroundColor: Theme.of(context).primaryColor,
+                title: const Text('Home'),
+                bottom: const TabBar(
+                  indicatorColor: Colors.white,
+                  tabs: [
+                    Tab(
+                      text: 'Chats',
+                    ),
+                    Tab(
+                      text: 'Grupos',
+                    ),
+                  ],
+                ),
+                actions: [
+                  snapshot.connectionState == ConnectionState.waiting ||
+                          !snapshot.hasData ||
+                          snapshot.hasError ||
+                          snapshot.data!['requestReceived'].length == 0
+                      ? const Icon(
+                          Icons.notifications,
+                        )
+                      : badges.Badge(
+                          badgeContent: Text(
+                            snapshot.data!['requestReceived'].length.toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          position: badges.BadgePosition.topEnd(top: 1, end: 5),
+                          child: IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NotificationsPage(
+                                    notifications:
+                                        snapshot.data!['requestReceived'],
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.notifications,
+                            ),
+                          ),
+                        ),
+                  IconButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => NotificationsPage(
-                            notifications: snapshot.data!['requestReceived'],
+                          builder: (context) => CreateGroup(
+                            userName: _name,
                           ),
                         ),
                       );
                     },
                     icon: const Icon(
-                      Icons.notifications,
+                      Icons.add,
+                      color: Colors.white,
                     ),
                   ),
-                );
-              },
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateGroup(
-                      userName: _name,
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchPage(
+                            userName: FirebaseAuth.instance.currentUser!.uid,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.search,
                     ),
                   ),
-                );
-              },
-              icon: const Icon(
-                Icons.add,
-                color: Colors.white,
+                ],
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SearchPage(
-                      userName: FirebaseAuth.instance.currentUser!.uid,
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(
-                Icons.search,
+              body: const TabBarView(
+                children: [
+                  Chats(),
+                  Groups(),
+                ],
               ),
-            ),
-          ],
-        ),
-        body: const TabBarView(
-          children: [
-            Chats(),
-            Groups(),
-          ],
-        ),
-      ),
+            );
+          }),
     );
   }
 }

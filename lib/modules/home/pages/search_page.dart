@@ -127,11 +127,13 @@ class _SearchPageState extends State<SearchPage> {
                           ),
                         ),
                         child: ChatContainer(
+                          photoUrl: '',
                           groupName: _users[index]['name'],
                           message: _users[index]['email'],
                           lastSenderEmail: '',
                           lastSenderName: '',
                           isGroup: false,
+                          isTyping: false,
                         ),
                       )
                     : Container();
@@ -160,12 +162,14 @@ class _SearchPageState extends State<SearchPage> {
                       );
                     },
                     child: ChatContainer(
+                      photoUrl: '',
                       groupName: _groups[index]['groupName'],
                       message: _groups[index]['groupDescription'],
                       subtitle: '${_groups[index]['members'].length} miembros',
                       lastSenderEmail: '',
                       lastSenderName: '',
                       isGroup: false,
+                      isTyping: false,
                     ),
                   ),
                 );
