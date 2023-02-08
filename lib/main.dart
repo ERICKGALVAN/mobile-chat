@@ -111,7 +111,7 @@ class MyApp extends StatelessWidget {
           ],
           child: (isActive == false || isActive == null)
               ? const Login()
-              : const Login(),
+              : const HomePage(),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -27,28 +28,57 @@ class _ProfileState extends State<Profile> {
     final firebaseStorage = FirebaseStorage.instance;
     final imagePicker = ImagePicker();
     //Check Permissions
-    await Permission.photos.request();
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 32) {
+        Permission.storage.request();
+        var permissionStatus = await Permission.storage.status;
 
-    var permissionStatus = await Permission.photos.status;
+        if (permissionStatus.isGranted) {
+          final image =
+              await imagePicker.pickImage(source: ImageSource.gallery);
+          var file = File(image!.path);
 
-    if (permissionStatus.isGranted) {
-      final image = await imagePicker.pickImage(source: ImageSource.gallery);
-      var file = File(image!.path);
+          try {
+            var snapshot = await firebaseStorage
+                .ref()
+                .child('profilePic/${FirebaseAuth.instance.currentUser!.uid}')
+                .putFile(file);
 
-      try {
-        var snapshot = await firebaseStorage
-            .ref()
-            .child('folderName/imageName')
-            .putFile(file);
+            var downloadUrl = await snapshot.ref.getDownloadURL();
+            await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                .changeProfilePicture(downloadUrl);
+          } catch (e) {
+            log(e.toString());
+          }
+        } else {
+          log('Permission not granted. Try Again with permission access');
+        }
+      } else {
+        Permission.photos.request();
+        var permissionStatus = await Permission.photos.status;
 
-        var downloadUrl = await snapshot.ref.getDownloadURL();
-        await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
-            .changeProfilePicture(downloadUrl);
-      } catch (e) {
-        log(e.toString());
+        if (permissionStatus.isGranted) {
+          final image =
+              await imagePicker.pickImage(source: ImageSource.gallery);
+          var file = File(image!.path);
+
+          try {
+            var snapshot = await firebaseStorage
+                .ref()
+                .child('profilePic/${FirebaseAuth.instance.currentUser!.uid}')
+                .putFile(file);
+
+            var downloadUrl = await snapshot.ref.getDownloadURL();
+            await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                .changeProfilePicture(downloadUrl);
+          } catch (e) {
+            log(e.toString());
+          }
+        } else {
+          log('Permission not granted. Try Again with permission access');
+        }
       }
-    } else {
-      log('Permission not granted. Try Again with permission access');
     }
   }
 
@@ -56,13 +86,14 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            color: Colors.black,
-            onPressed: () => Navigator.pop(context),
-          )),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Colors.black,
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
