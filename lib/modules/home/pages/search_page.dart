@@ -134,6 +134,7 @@ class _SearchPageState extends State<SearchPage> {
                           lastSenderName: '',
                           isGroup: false,
                           isTyping: false,
+                          showUserName: false,
                         ),
                       )
                     : Container();
@@ -157,6 +158,7 @@ class _SearchPageState extends State<SearchPage> {
                             groupMembers: _groups[index]['members'],
                             groupId: _groups[index]['groupId'].split('_')[0],
                             groupName: _groups[index]['groupName'],
+                            profilePic: _groups[index]['groupIcon'],
                           ),
                         ),
                       );
@@ -170,6 +172,7 @@ class _SearchPageState extends State<SearchPage> {
                       lastSenderName: '',
                       isGroup: false,
                       isTyping: false,
+                      showUserName: false,
                     ),
                   ),
                 );

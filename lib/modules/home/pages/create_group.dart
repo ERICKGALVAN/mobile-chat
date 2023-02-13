@@ -28,7 +28,7 @@ class _CreateGroupState extends State<CreateGroup> {
         elevation: 0,
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('Crear grupo'),
+        title: const Text('Create group'),
       ),
       body: _isLoading
           ? Center(
@@ -42,7 +42,7 @@ class _CreateGroupState extends State<CreateGroup> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Nombre del grupo',
+                    'Group name',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -50,12 +50,12 @@ class _CreateGroupState extends State<CreateGroup> {
                   ),
                   const SizedBox(height: 10),
                   MainInput(
-                    hintText: 'Nombre del grupo',
+                    hintText: 'Group name',
                     controller: _nameController,
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Descripción del grupo',
+                    'Group description',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -63,12 +63,12 @@ class _CreateGroupState extends State<CreateGroup> {
                   ),
                   const SizedBox(height: 10),
                   MainInput(
-                    hintText: 'Descripción del grupo',
+                    hintText: 'Group description',
                     controller: _descriptionController,
                   ),
                   const SizedBox(height: 20),
                   MainButton(
-                    text: 'Crear',
+                    text: 'Create group',
                     onPressed: () async {
                       if (_nameController.text.isNotEmpty) {
                         setState(() {
@@ -83,18 +83,20 @@ class _CreateGroupState extends State<CreateGroup> {
                           _descriptionController.text,
                           _email,
                         )
-                            .whenComplete(() {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Grupo creado correctamente'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        });
+                            .whenComplete(
+                          () {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Grupo creado correctamente'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          },
+                        );
                       }
                     },
                   ),

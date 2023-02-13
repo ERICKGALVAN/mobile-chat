@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -192,7 +191,7 @@ class _ChatPageState extends State<ChatPage> {
                           height: 50,
                           width: 50,
                           child: FloatingActionButton(
-                            onPressed: () {
+                            onPressed: () async {
                               _sendMessage();
                             },
                             backgroundColor: Theme.of(context).primaryColor,

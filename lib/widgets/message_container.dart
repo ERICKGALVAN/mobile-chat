@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/modules/auth/services/database_service.dart';
 
 class MessageContainer extends StatelessWidget {
   const MessageContainer({
@@ -83,7 +84,7 @@ class MessageContainer extends StatelessWidget {
                 ),
               const SizedBox(height: 5),
               Text(
-                message,
+                DatabaseService().decryptText(message),
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.white,

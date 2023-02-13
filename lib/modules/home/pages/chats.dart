@@ -44,7 +44,6 @@ class _ChatsState extends State<Chats> {
                           .doc(snapshot.data!['chats'][index]['chatId'])
                           .snapshots(),
                       builder: (context, chatSnapshot) {
-                        log(snapshot.data!.exists.toString());
                         return InkWell(
                           onTap: () {
                             Navigator.push(
@@ -61,40 +60,41 @@ class _ChatsState extends State<Chats> {
                             );
                           },
                           child: StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(snapshot.data!['chats'][index]
-                                      ['chatWith']['uid'])
-                                  .snapshots(),
-                              builder: (context, picSnapshot) {
-                                return ChatContainer(
-                                  photoUrl: picSnapshot.hasData
-                                      ? picSnapshot.data!['photoURL'].toString()
-                                      : '',
-                                  groupName: snapshot.data!['chats'][index]
-                                          ['chatWith']['name']
-                                      .toString(),
-                                  message: chatSnapshot.hasData
-                                      ? chatSnapshot.data!['recentMessage']
-                                          .toString()
-                                      : '',
-                                  lastSenderEmail: chatSnapshot.hasData
-                                      ? chatSnapshot
-                                          .data!['recentMessageSenderEmail']
-                                          .toString()
-                                      : '',
-                                  lastSenderName: chatSnapshot.hasData
-                                      ? chatSnapshot
-                                          .data!['recentMessageSender']
-                                          .toString()
-                                      : '',
-                                  isGroup: false,
-                                  isTyping: chatSnapshot.hasData
-                                      ? chatSnapshot
-                                          .data!['${chatWithId}isTyping']
-                                      : false,
-                                );
-                              }),
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(snapshot.data!['chats'][index]['chatWith']
+                                    ['uid'])
+                                .snapshots(),
+                            builder: (context, picSnapshot) {
+                              return ChatContainer(
+                                showUserName: false,
+                                photoUrl: picSnapshot.hasData
+                                    ? picSnapshot.data!['photoURL'].toString()
+                                    : '',
+                                groupName: snapshot.data!['chats'][index]
+                                        ['chatWith']['name']
+                                    .toString(),
+                                message: chatSnapshot.hasData
+                                    ? chatSnapshot.data!['recentMessage']
+                                        .toString()
+                                    : '',
+                                lastSenderEmail: chatSnapshot.hasData
+                                    ? chatSnapshot
+                                        .data!['recentMessageSenderEmail']
+                                        .toString()
+                                    : '',
+                                lastSenderName: chatSnapshot.hasData
+                                    ? chatSnapshot.data!['recentMessageSender']
+                                        .toString()
+                                    : '',
+                                isGroup: false,
+                                isTyping: chatSnapshot.hasData
+                                    ? chatSnapshot
+                                        .data!['${chatWithId}isTyping']
+                                    : false,
+                              );
+                            },
+                          ),
                         );
                       },
                     );

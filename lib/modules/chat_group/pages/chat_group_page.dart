@@ -12,11 +12,13 @@ class ChatGroupPage extends StatefulWidget {
     required this.groupId,
     required this.groupName,
     required this.userEmail,
+    required this.profilePic,
   }) : super(key: key);
   final String groupName;
   final String groupId;
   final String userName;
   final String userEmail;
+  final String profilePic;
 
   @override
   State<ChatGroupPage> createState() => _ChatGroupPageState();
@@ -35,7 +37,6 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
   List _groupMembers = [];
   final _messageController = TextEditingController();
   bool _isLoading = false;
-  final ScrollController _scrollController = ScrollController();
   String _name = '';
 
   @override
@@ -102,6 +103,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                       groupId: widget.groupId,
                       groupMembers: _groupMembers,
                       groupName: widget.groupName,
+                      profilePic: widget.profilePic,
                     );
                   },
                 ),
@@ -119,80 +121,83 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
               stream: _messages,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Column(
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.8,
-                        child: Container(
-                          color: const Color.fromARGB(255, 68, 18, 161),
-                          child: ListView.builder(
-                            primary: true,
-                            shrinkWrap: true,
-                            itemCount: snapshot.data!['messages'].length,
-                            itemBuilder: (context, index) {
-                              final Timestamp timeStamp =
-                                  snapshot.data!['messages'][index]['time'];
-                              final date = DateTime.fromMillisecondsSinceEpoch(
-                                      timeStamp.seconds * 1000)
-                                  .toLocal();
-                              final String formattedDate =
-                                  "${date.day}/${date.month}/${date.year}";
-                              final String formattedTime =
-                                  "${date.hour}:${date.minute}";
-                              return MessageContainer(
-                                userName: widget.userName,
-                                sender: snapshot.data!['messages'][index]
-                                    ['sender'],
-                                senderEmail: snapshot.data!['messages'][index]
-                                        ['senderEmail'] ??
-                                    '',
-                                message: snapshot.data!['messages'][index]
-                                    ['message'],
-                                time: formattedTime,
-                                date: formattedDate,
-                                isGroup: true,
-                              );
-                            },
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          child: Container(
+                            color: const Color.fromARGB(255, 68, 18, 161),
+                            child: ListView.builder(
+                              primary: true,
+                              shrinkWrap: true,
+                              itemCount: snapshot.data!['messages'].length,
+                              itemBuilder: (context, index) {
+                                final Timestamp timeStamp =
+                                    snapshot.data!['messages'][index]['time'];
+                                final date =
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                            timeStamp.seconds * 1000)
+                                        .toLocal();
+                                final String formattedDate =
+                                    "${date.day}/${date.month}/${date.year}";
+                                final String formattedTime =
+                                    "${date.hour}:${date.minute}";
+                                return MessageContainer(
+                                  userName: widget.userName,
+                                  sender: snapshot.data!['messages'][index]
+                                      ['sender'],
+                                  senderEmail: snapshot.data!['messages'][index]
+                                          ['senderEmail'] ??
+                                      '',
+                                  message: snapshot.data!['messages'][index]
+                                      ['message'],
+                                  time: formattedTime,
+                                  date: formattedDate,
+                                  isGroup: true,
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _messageController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Type a message',
-                                  hintStyle: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 16,
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _messageController,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Type a message',
+                                    hintStyle: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 16,
+                                    ),
+                                    border: InputBorder.none,
                                   ),
-                                  border: InputBorder.none,
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 50,
-                              width: 50,
-                              child: FloatingActionButton(
-                                onPressed: () {
-                                  _sendMessage();
-                                },
-                                backgroundColor: const Color(0xff007EF4),
-                                elevation: 0,
-                                child: const Icon(
-                                  Icons.send,
-                                  color: Colors.white,
-                                  size: 18,
+                              SizedBox(
+                                height: 50,
+                                width: 50,
+                                child: FloatingActionButton(
+                                  onPressed: () {
+                                    _sendMessage();
+                                  },
+                                  backgroundColor: const Color(0xff007EF4),
+                                  elevation: 0,
+                                  child: const Icon(
+                                    Icons.send,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 } else {
                   return const Center(

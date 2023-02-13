@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseService {
@@ -308,10 +309,16 @@ class DatabaseService {
   }
 
   Future sendMessageToGroup(
-      String groupId, String message, String sender, String email) async {
+    String groupId,
+    String message,
+    String sender,
+    String email,
+  ) async {
     DocumentReference groupDocumentReference = groupCollection.doc(groupId);
+    final String encriptedMessage = encryptText(message);
+
     groupDocumentReference.update({
-      'recentMessage': message,
+      'recentMessage': encriptedMessage,
       'recentMessageSender': sender,
       'recentMessageTime': DateTime.now().toUtc(),
     });
@@ -320,7 +327,7 @@ class DatabaseService {
         'messages': FieldValue.arrayUnion(
           [
             {
-              'message': message,
+              'message': encriptedMessage,
               'sender': sender,
               'senderEmail': email,
               'time': DateTime.now().toUtc(),
@@ -332,28 +339,31 @@ class DatabaseService {
   }
 
   Future sendMessageToChat(
-      String chatId, String message, String sender, String email) async {
-    DocumentReference groupDocumentReference = messageCollection.doc(chatId);
-    groupDocumentReference.update({
-      'recentMessage': message,
+    String chatId,
+    String message,
+    String sender,
+    String email,
+  ) async {
+    DocumentReference messagesDocumentReference = messageCollection.doc(chatId);
+    final String encriptedMessage = encryptText(message);
+    messagesDocumentReference.update({
+      'recentMessage': encriptedMessage,
       'recentMessageSender': sender,
       'recentMessageSenderEmail': email,
       'recentMessageTime': DateTime.now().toUtc(),
     });
-    await groupDocumentReference.update(
-      {
-        'messages': FieldValue.arrayUnion(
-          [
-            {
-              'message': message,
-              'sender': sender,
-              'senderEmail': email,
-              'time': DateTime.now().toUtc(),
-            }
-          ],
-        ),
-      },
-    );
+    await messagesDocumentReference.update({
+      'messages': FieldValue.arrayUnion(
+        [
+          {
+            'message': encriptedMessage,
+            'sender': sender,
+            'senderEmail': email,
+            'time': DateTime.now().toUtc(),
+          }
+        ],
+      ),
+    });
   }
 
   Future<Stream> getGroupMessages(String groupId) async {
@@ -375,5 +385,31 @@ class DatabaseService {
     await userCollection.doc(uid).update({
       'photoURL': url,
     });
+  }
+
+  Future changeProfilePictureGroup(String url, String groupId) async {
+    await groupCollection.doc(groupId).update({
+      'groupIcon': url,
+    });
+  }
+
+  String encryptText(
+    String text,
+  ) {
+    final key = encrypt.Key.fromLength(32);
+    final iv = encrypt.IV.fromLength(8);
+    final encrypter = encrypt.Encrypter(encrypt.Salsa20(key));
+    final encrypted = encrypter.encrypt(text, iv: iv);
+    return encrypted.base64;
+  }
+
+  String decryptText(
+    String encryptedText,
+  ) {
+    final key = encrypt.Key.fromLength(32);
+    final iv = encrypt.IV.fromLength(8);
+    final encrypter = encrypt.Encrypter(encrypt.Salsa20(key));
+    final decrypted = encrypter.decrypt64(encryptedText, iv: iv);
+    return decrypted;
   }
 }

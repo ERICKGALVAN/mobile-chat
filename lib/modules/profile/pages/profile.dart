@@ -24,7 +24,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  uploadImage() async {
+  void uploadImage() async {
     final firebaseStorage = FirebaseStorage.instance;
     final imagePicker = ImagePicker();
     //Check Permissions

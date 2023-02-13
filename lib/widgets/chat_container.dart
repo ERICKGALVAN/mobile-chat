@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/modules/auth/services/database_service.dart';
 
 class ChatContainer extends StatelessWidget {
   const ChatContainer({
@@ -13,6 +14,7 @@ class ChatContainer extends StatelessWidget {
     required this.isGroup,
     required this.isTyping,
     required this.photoUrl,
+    required this.showUserName,
   }) : super(key: key);
   final String groupName;
   final String? message;
@@ -23,6 +25,7 @@ class ChatContainer extends StatelessWidget {
   final bool isGroup;
   final bool isTyping;
   final String photoUrl;
+  final bool showUserName;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,9 @@ class ChatContainer extends StatelessWidget {
                                     : Text(
                                         userEmail == lastSenderEmail
                                             ? 'You'
-                                            : '$lastSenderName:',
+                                            : showUserName
+                                                ? lastSenderName
+                                                : '',
                                         style: const TextStyle(
                                           fontSize: 15,
                                           color: Colors.black,
@@ -87,7 +92,7 @@ class ChatContainer extends StatelessWidget {
                                       ),
                                 const SizedBox(width: 5),
                                 Text(
-                                  message!,
+                                  DatabaseService().decryptText(message!),
                                   style: const TextStyle(
                                     overflow: TextOverflow.ellipsis,
                                   ),

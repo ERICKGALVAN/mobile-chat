@@ -1,9 +1,14 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/home/pages/home_page.dart';
 import 'package:flutter_chat/widgets/main_button.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../auth/services/database_service.dart';
@@ -16,12 +21,14 @@ class ChatGroupInfo extends StatefulWidget {
     required this.groupMembers,
     required this.groupId,
     required this.groupName,
+    required this.profilePic,
   }) : super(key: key);
   final String userName;
   final String groupName;
   final String groupId;
   final String admin;
   final List groupMembers;
+  final String profilePic;
 
   @override
   State<ChatGroupInfo> createState() => _ChatGroupInfoState();
@@ -68,8 +75,10 @@ class _ChatGroupInfoState extends State<ChatGroupInfo> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Has salido del grupo'),
+        SnackBar(
+          content: Text(_isMember
+              ? 'Has salido del grupo'
+              : 'Ahora eres miembro del grupo'),
         ),
       );
       Navigator.push(
@@ -92,6 +101,67 @@ class _ChatGroupInfoState extends State<ChatGroupInfo> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  void uploadImage() async {
+    final firebaseStorage = FirebaseStorage.instance;
+    final imagePicker = ImagePicker();
+    //Check Permissions
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 32) {
+        Permission.storage.request();
+        var permissionStatus = await Permission.storage.status;
+
+        if (permissionStatus.isGranted) {
+          final image =
+              await imagePicker.pickImage(source: ImageSource.gallery);
+          var file = File(image!.path);
+          try {
+            var snapshot = await firebaseStorage
+                .ref()
+                .child('profilePic/${widget.groupId}')
+                .putFile(file);
+            var downloadUrl = await snapshot.ref.getDownloadURL();
+            await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                .changeProfilePictureGroup(
+              downloadUrl,
+              widget.groupId,
+            );
+          } catch (e) {
+            log(e.toString());
+          }
+        } else {
+          log('Permission not granted. Try Again with permission access');
+        }
+      } else {
+        Permission.photos.request();
+        var permissionStatus = await Permission.photos.status;
+
+        if (permissionStatus.isGranted) {
+          final image =
+              await imagePicker.pickImage(source: ImageSource.gallery);
+          var file = File(image!.path);
+          try {
+            var snapshot = await firebaseStorage
+                .ref()
+                .child('profilePic/${widget.groupId}')
+                .putFile(file);
+
+            var downloadUrl = await snapshot.ref.getDownloadURL();
+            await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                .changeProfilePictureGroup(
+              downloadUrl,
+              widget.groupId,
+            );
+          } catch (e) {
+            log(e.toString());
+          }
+        } else {
+          log('Permission not granted. Try Again with permission access');
+        }
+      }
+    }
   }
 
   @override
@@ -121,8 +191,34 @@ class _ChatGroupInfoState extends State<ChatGroupInfo> {
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            _isMember ? uploadImage() : null;
+                          },
+                          child: CircleAvatar(
+                            radius: 90,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundImage: widget.profilePic.isEmpty
+                                ? null
+                                : NetworkImage(widget.profilePic),
+                          ),
+                        ),
+                        Text(
+                          widget.groupName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 24,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
                     Text(
                       '${widget.groupMembers.length.toString()} miembros',
                       style: const TextStyle(
