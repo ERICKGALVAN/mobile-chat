@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -44,29 +42,43 @@ class _ChatsState extends State<Chats> {
                           .doc(snapshot.data!['chats'][index]['chatId'])
                           .snapshots(),
                       builder: (context, chatSnapshot) {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatPage(
-                                  chatId: snapshot.data!['chats'][index]
-                                      ['chatId'],
-                                  contactName: snapshot.data!['chats'][index]
-                                      ['chatWith']['name'],
-                                  contactId: chatWithId,
-                                ),
-                              ),
-                            );
-                          },
-                          child: StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(snapshot.data!['chats'][index]['chatWith']
-                                    ['uid'])
-                                .snapshots(),
-                            builder: (context, picSnapshot) {
-                              return ChatContainer(
+                        return StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(snapshot.data!['chats'][index]['chatWith']
+                                  ['uid'])
+                              .snapshots(),
+                          builder: (context, picSnapshot) {
+                            final Timestamp timeStamp = chatSnapshot.hasData
+                                ? chatSnapshot.data!['recentMessageTime']
+                                : Timestamp.now();
+                            final date = DateTime.fromMillisecondsSinceEpoch(
+                                    timeStamp.seconds * 1000)
+                                .toLocal();
+                            final String formattedDate =
+                                "${date.day}/${date.month}/${date.year}";
+                            final String formattedTime =
+                                "${date.hour}:${date.minute}";
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatPage(
+                                      chatId: snapshot.data!['chats'][index]
+                                          ['chatId'],
+                                      contactName: snapshot.data!['chats']
+                                          [index]['chatWith']['name'],
+                                      contactId: chatWithId,
+                                      contactPhotoUrl: picSnapshot.hasData
+                                          ? picSnapshot.data!['photoURL']
+                                              .toString()
+                                          : '',
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: ChatContainer(
                                 showUserName: false,
                                 photoUrl: picSnapshot.hasData
                                     ? picSnapshot.data!['photoURL'].toString()
@@ -92,9 +104,11 @@ class _ChatsState extends State<Chats> {
                                     ? chatSnapshot
                                         .data!['${chatWithId}isTyping']
                                     : false,
-                              );
-                            },
-                          ),
+                                lastMessageHour: formattedTime,
+                                lastMessageDate: formattedDate,
+                              ),
+                            );
+                          },
                         );
                       },
                     );

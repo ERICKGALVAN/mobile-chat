@@ -48,7 +48,7 @@ class MessageContainer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isGroup)
+              if (isGroup && sender != userName)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -83,7 +83,7 @@ class MessageContainer extends StatelessWidget {
                   ],
                 ),
               const SizedBox(height: 5),
-              Text(
+              SelectableText(
                 DatabaseService().decryptText(message),
                 style: const TextStyle(
                   fontSize: 16,

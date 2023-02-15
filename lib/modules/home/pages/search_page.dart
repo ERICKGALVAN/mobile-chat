@@ -123,11 +123,12 @@ class _SearchPageState extends State<SearchPage> {
                               contactName: _users[index]['name'],
                               contactId: _users[index]['uid'],
                               userId: widget.userName,
+                              photoUrl: _users[index]['photoURL'],
                             ),
                           ),
                         ),
                         child: ChatContainer(
-                          photoUrl: '',
+                          photoUrl: _users[index]['photoURL'],
                           groupName: _users[index]['name'],
                           message: _users[index]['email'],
                           lastSenderEmail: '',
@@ -159,6 +160,8 @@ class _SearchPageState extends State<SearchPage> {
                             groupId: _groups[index]['groupId'].split('_')[0],
                             groupName: _groups[index]['groupName'],
                             profilePic: _groups[index]['groupIcon'],
+                            groupDescription: _groups[index]
+                                ['groupDescription'],
                           ),
                         ),
                       );

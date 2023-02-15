@@ -60,6 +60,15 @@ class _GroupsState extends State<Groups> {
                   .doc(getGroupId(snapshot.data!['groups'][reversedIndex]))
                   .snapshots(),
               builder: (context, groupSnapshot) {
+                final Timestamp timeStamp = groupSnapshot.hasData
+                    ? groupSnapshot.data!['recentMessageTime']
+                    : Timestamp.now();
+                final date = DateTime.fromMillisecondsSinceEpoch(
+                        timeStamp.seconds * 1000)
+                    .toLocal();
+                final String formattedDate =
+                    "${date.day}/${date.month}/${date.year}";
+                final String formattedTime = "${date.hour}:${date.minute}";
                 return InkWell(
                   onTap: () => Navigator.push(
                     context,
@@ -74,6 +83,9 @@ class _GroupsState extends State<Groups> {
                         profilePic: groupSnapshot.hasData
                             ? groupSnapshot.data!['groupIcon']
                             : '',
+                        groupDescription: groupSnapshot.hasData
+                            ? groupSnapshot.data!['groupDescription']
+                            : '',
                       ),
                     ),
                   ),
@@ -84,7 +96,7 @@ class _GroupsState extends State<Groups> {
                     groupName:
                         getGroupName(snapshot.data!['groups'][reversedIndex]),
                     lastSenderEmail: groupSnapshot.hasData
-                        ? groupSnapshot.data!['recentMessageSender']
+                        ? groupSnapshot.data!['recentMessageSenderEmail']
                         : '',
                     lastSenderName: groupSnapshot.hasData
                         ? groupSnapshot.data!['recentMessageSender']
@@ -95,6 +107,8 @@ class _GroupsState extends State<Groups> {
                         ? groupSnapshot.data!['recentMessage']
                         : '',
                     showUserName: true,
+                    lastMessageHour: formattedTime,
+                    lastMessageDate: formattedDate,
                   ),
                 );
               },

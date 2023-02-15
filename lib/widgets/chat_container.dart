@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
@@ -15,6 +17,8 @@ class ChatContainer extends StatelessWidget {
     required this.isTyping,
     required this.photoUrl,
     required this.showUserName,
+    this.lastMessageHour,
+    this.lastMessageDate,
   }) : super(key: key);
   final String groupName;
   final String? message;
@@ -26,10 +30,15 @@ class ChatContainer extends StatelessWidget {
   final bool isTyping;
   final String photoUrl;
   final bool showUserName;
+  final String? lastMessageHour;
+  final String? lastMessageDate;
 
   @override
   Widget build(BuildContext context) {
     final String userEmail = FirebaseAuth.instance.currentUser!.email!;
+    final String todayDate =
+        '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -91,10 +100,18 @@ class ChatContainer extends StatelessWidget {
                                         ),
                                       ),
                                 const SizedBox(width: 5),
-                                Text(
-                                  DatabaseService().decryptText(message!),
-                                  style: const TextStyle(
-                                    overflow: TextOverflow.ellipsis,
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.4,
+                                  height: 15,
+                                  child: Text(
+                                    message!.contains('@')
+                                        ? message!
+                                        : DatabaseService()
+                                            .decryptText(message!),
+                                    style: const TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -111,6 +128,25 @@ class ChatContainer extends StatelessWidget {
                 ],
               ),
             ),
+            todayDate != lastMessageDate
+                ? lastMessageDate != null
+                    ? Text(
+                        lastMessageDate!,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 15,
+                        ),
+                      )
+                    : Container()
+                : lastMessageHour != null
+                    ? Text(
+                        lastMessageHour!,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 15,
+                        ),
+                      )
+                    : Container(),
             isJoined != null
                 ? isJoined!
                     ? const Icon(

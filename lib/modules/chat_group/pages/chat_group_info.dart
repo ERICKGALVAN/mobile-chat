@@ -22,6 +22,7 @@ class ChatGroupInfo extends StatefulWidget {
     required this.groupId,
     required this.groupName,
     required this.profilePic,
+    required this.groupDescription,
   }) : super(key: key);
   final String userName;
   final String groupName;
@@ -29,6 +30,7 @@ class ChatGroupInfo extends StatefulWidget {
   final String admin;
   final List groupMembers;
   final String profilePic;
+  final String groupDescription;
 
   @override
   State<ChatGroupInfo> createState() => _ChatGroupInfoState();
@@ -217,7 +219,21 @@ class _ChatGroupInfoState extends State<ChatGroupInfo> {
                           ),
                           textAlign: TextAlign.start,
                         ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          widget.groupDescription,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 18,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
+                    ),
+                    const SizedBox(
+                      height: 20,
                     ),
                     Text(
                       '${widget.groupMembers.length.toString()} miembros',

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/modules/auth/services/database_service.dart';
 import 'package:flutter_chat/widgets/main_button.dart';
@@ -12,10 +11,12 @@ class ChatInfo extends StatefulWidget {
     required this.contactName,
     required this.userId,
     required this.contactId,
+    required this.photoUrl,
   }) : super(key: key);
   final String userId;
   final String contactName;
   final String contactId;
+  final String photoUrl;
 
   @override
   State<ChatInfo> createState() => _ChatInfoState();
@@ -99,14 +100,25 @@ class _ChatInfoState extends State<ChatInfo> {
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(
                       height: 10,
                     ),
-                    Text(widget.contactName),
-                    Text(widget.contactId),
-                    Text(widget.userId),
+                    CircleAvatar(
+                      radius: 90,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundImage: widget.photoUrl.isEmpty
+                          ? null
+                          : NetworkImage(widget.photoUrl),
+                    ),
+                    Text(
+                      widget.contactName,
+                      style: const TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),

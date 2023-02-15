@@ -13,12 +13,14 @@ class ChatGroupPage extends StatefulWidget {
     required this.groupName,
     required this.userEmail,
     required this.profilePic,
+    required this.groupDescription,
   }) : super(key: key);
   final String groupName;
   final String groupId;
   final String userName;
   final String userEmail;
   final String profilePic;
+  final String groupDescription;
 
   @override
   State<ChatGroupPage> createState() => _ChatGroupPageState();
@@ -104,6 +106,7 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                       groupMembers: _groupMembers,
                       groupName: widget.groupName,
                       profilePic: widget.profilePic,
+                      groupDescription: widget.groupDescription,
                     );
                   },
                 ),
@@ -129,12 +132,17 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                           child: Container(
                             color: const Color.fromARGB(255, 68, 18, 161),
                             child: ListView.builder(
+                              reverse: true,
                               primary: true,
                               shrinkWrap: true,
                               itemCount: snapshot.data!['messages'].length,
                               itemBuilder: (context, index) {
-                                final Timestamp timeStamp =
-                                    snapshot.data!['messages'][index]['time'];
+                                final reversedIndex =
+                                    snapshot.data!['messages'].length -
+                                        index -
+                                        1;
+                                final Timestamp timeStamp = snapshot
+                                    .data!['messages'][reversedIndex]['time'];
                                 final date =
                                     DateTime.fromMillisecondsSinceEpoch(
                                             timeStamp.seconds * 1000)
@@ -145,13 +153,13 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                                     "${date.hour}:${date.minute}";
                                 return MessageContainer(
                                   userName: widget.userName,
-                                  sender: snapshot.data!['messages'][index]
-                                      ['sender'],
-                                  senderEmail: snapshot.data!['messages'][index]
-                                          ['senderEmail'] ??
+                                  sender: snapshot.data!['messages']
+                                      [reversedIndex]['sender'],
+                                  senderEmail: snapshot.data!['messages']
+                                          [reversedIndex]['senderEmail'] ??
                                       '',
-                                  message: snapshot.data!['messages'][index]
-                                      ['message'],
+                                  message: snapshot.data!['messages']
+                                      [reversedIndex]['message'],
                                   time: formattedTime,
                                   date: formattedDate,
                                   isGroup: true,
@@ -166,6 +174,8 @@ class _ChatGroupPageState extends State<ChatGroupPage> {
                             children: [
                               Expanded(
                                 child: TextField(
+                                  maxLines: null,
+                                  keyboardType: TextInputType.multiline,
                                   controller: _messageController,
                                   decoration: const InputDecoration(
                                     hintText: 'Type a message',

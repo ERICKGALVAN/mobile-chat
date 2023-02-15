@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/modules/chat/pages/chat_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../widgets/message_container.dart';
@@ -15,11 +15,13 @@ class ChatPage extends StatefulWidget {
     required this.chatId,
     required this.contactName,
     required this.contactId,
+    required this.contactPhotoUrl,
   }) : super(key: key);
 
   final String chatId;
   final String contactName;
   final String contactId;
+  final String contactPhotoUrl;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -109,7 +111,19 @@ class _ChatPageState extends State<ChatPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatInfo(
+                    contactName: widget.contactName,
+                    userId: FirebaseAuth.instance.currentUser!.uid,
+                    contactId: widget.contactId,
+                    photoUrl: widget.contactPhotoUrl,
+                  ),
+                ),
+              );
+            },
             icon: const Icon(
               Icons.info,
             ),
@@ -132,10 +146,13 @@ class _ChatPageState extends State<ChatPage> {
                       child: ListView.builder(
                         primary: true,
                         shrinkWrap: true,
+                        reverse: true,
                         itemCount: snapshot.data!['messages'].length,
                         itemBuilder: (context, index) {
+                          final reversedIndex =
+                              snapshot.data!['messages'].length - index - 1;
                           final Timestamp timeStamp =
-                              snapshot.data!['messages'][index]['time'];
+                              snapshot.data!['messages'][reversedIndex]['time'];
                           final date = DateTime.fromMillisecondsSinceEpoch(
                                   timeStamp.seconds * 1000)
                               .toLocal();
@@ -145,11 +162,12 @@ class _ChatPageState extends State<ChatPage> {
                               "${date.hour}:${date.minute}";
                           return MessageContainer(
                             userName: _name,
-                            sender: snapshot.data!['messages'][index]['sender'],
-                            senderEmail: snapshot.data!['messages'][index]
-                                    ['senderEmail'] ??
+                            sender: snapshot.data!['messages'][reversedIndex]
+                                ['sender'],
+                            senderEmail: snapshot.data!['messages']
+                                    [reversedIndex]['senderEmail'] ??
                                 '',
-                            message: snapshot.data!['messages'][index]
+                            message: snapshot.data!['messages'][reversedIndex]
                                 ['message'],
                             date: formattedDate,
                             time: formattedTime,
@@ -165,6 +183,8 @@ class _ChatPageState extends State<ChatPage> {
                       children: [
                         Expanded(
                           child: TextField(
+                            maxLines: null,
+                            keyboardType: TextInputType.multiline,
                             controller: _messageController,
                             decoration: const InputDecoration(
                               hintText: 'Type a message',
